@@ -1,0 +1,49 @@
+version: "3"
+services:
+
+  nginx:
+    container_name: my-nginx
+    image: nginx:1.13
+    restart: always
+    ports:
+      - "8080:80"
+    volumes:
+      - "./nginx/conf.d:/etc/nginx/conf.d"
+
+  mysql:
+    container_name: my-mysql
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_DATABASE: zkyzl
+      MYSQL_ROOT_PASSWORD: 12345
+      MYSQL_ROOT_HOST: '%'
+    ports:
+      - "3306:3306"
+    volumes:
+      - "./mysql/db:/var/lib/mysql"
+      - "./mysql/conf/my.cnf:/etc/my.cnf"
+
+  redis:
+    container_name: my-redis
+    image: redis:5.0
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - "./redis/db:/data"
+      - "./redis/conf/redis.conf:/usr/local/etc/redis/redis.conf"
+
+  app:
+    container_name: my-app
+    image: openjdk:8-jdk
+    working_dir: /app
+    volumes:
+      - "./app:/app"
+    expose:
+      - "8080"
+    depends_on:
+      - nginx
+      - mysql
+      - redis
+    command: ["bash", "wait-for-it.sh", "mysql:3306", "--", "java", "-jar", "app.jar", "--spring.profiles.active=docker"]

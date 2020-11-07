@@ -1,0 +1,16 @@
+[
+	{
+		"id": 1,
+		"title": "账户管理",
+		"icon": "layui-icon layui-icon-username",
+		"type": 1,
+		"href": "view/account/list.html"
+	},
+	{
+		"id": 2,
+		"title": "任务管理",
+		"icon": "layui-icon layui-icon-form",
+		"type": 1,
+		"href": "view/task/list.html"
+	}
+]

@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <link href="../../component/layui/css/layui.css" rel="stylesheet" />
+    <link href="../../admin/css/pearCommon.css" rel="stylesheet" />
+</head>
+<body class="pear-container">
+<div class="layui-card">
+    <div class="layui-card-body">
+        <form class="layui-form" action="">
+            <div class="layui-form-item">
+                <label class="layui-form-label">用户名</label>
+                <div class="layui-input-inline">
+                    <input type="text" name="userName" placeholder="" class="layui-input">
+                </div>
+                <button class="pear-btn pear-btn-md pear-btn-primary" lay-submit lay-filter="task-query">
+                    <i class="layui-icon layui-icon-search"></i>
+                    查询
+                </button>
+                <button type="reset" class="pear-btn pear-btn-md">
+                    <i class="layui-icon layui-icon-refresh"></i>
+                    重置
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="layui-card">
+    <div class="layui-card-body">
+        <table id="task-table" lay-filter="task-table"></table>
+    </div>
+</div>
+
+<script type="text/html" id="task-toolbar">
+    <button class="pear-btn pear-btn-primary pear-btn-md" lay-event="add">
+        <i class="layui-icon layui-icon-add-1"></i>
+        新增
+    </button>
+    <button class="pear-btn pear-btn-danger pear-btn-md" lay-event="batchRemove">
+        <i class="layui-icon layui-icon-delete"></i>
+        删除
+    </button>
+    <!--
+    <button class="pear-btn pear-btn-success pear-btn-md" lay-event="manualBrush">
+        <i class="layui-icon layui-icon-senior"></i>
+        手动抢号
+    </button>
+    -->
+    <button class="pear-btn pear-btn-success pear-btn-md" lay-event="initTask">
+        <i class="layui-icon layui-icon-senior"></i>
+        初始任务
+    </button>
+</script>
+
+<script type="text/html" id="task-bar">
+    <button class="pear-btn pear-btn-primary pear-btn-sm" lay-event="edit"><i class="layui-icon layui-icon-edit"></i></button>
+    <button class="pear-btn pear-btn-danger pear-btn-sm" lay-event="remove"><i class="layui-icon layui-icon-delete"></i></button>
+</script>
+
+<script type="text/html" id="task-enable">
+    <input type="checkbox" name="enable" value="{{d.id}}" lay-skin="switch" lay-text="启用|禁用" lay-filter="task-enable" checked = "{{ d.enable == 0 ? 'true' : 'false' }}">
+</script>
+
+<script type="text/html" id="task-status">
+    {{#if (d.status == 0) { }}
+    <span>预约中</span>
+    {{# }else if(d.status == 1){ }}
+    <span>成功</span>
+    {{# }else if(d.status == 2){ }}
+    <span>失败</span>
+    {{# } }}
+</script>
+
+<script src="../../component/layui/layui.js"></script>
+<script>
+    layui.use(['table','form','jquery','layer'],function () {
+        let table = layui.table;
+        let form = layui.form;
+        let $ = layui.jquery;
+        let layer = layui.layer;
+
+        let MODULE_PATH = "operate/";
+
+        let cols = [
+            [
+                {type:'checkbox'},
+                {title: '用户名', field: 'userName', align:'center'},
+                {title: '科室', field: 'deptName', align:'center', width:150},
+                {title: '医生', field: 'docName', align:'center', width:80},
+                {title: '日期', field: 'targetDate', align:'center'},
+                {title: '状态', field: 'status', align:'center', templet:'#task-status'},
+                {title: '创建日期', field: 'createdAt', align:'center'},
+                {title: '备注', field: 'remark', align:'center'},
+                {title: '操作', toolbar: '#task-bar', align:'center', width:130}
+            ]
+        ];
+
+        table.render({
+            elem: '#task-table',
+            url: '/task/getList',
+            page: true ,
+            cols: cols ,
+            skin: 'line',
+            toolbar: '#task-toolbar',
+            defaultToolbar: [{
+                title: '刷新',
+                layEvent: 'refresh',
+                icon: 'layui-icon-refresh',
+            }, 'filter', 'exports']
+        });
+
+        table.on('tool(task-table)', function(obj){
+            if(obj.event === 'remove'){
+                window.remove(obj);
+            } else if(obj.event === 'edit'){
+                window .edit(obj);
+            }
+        });
+
+        table.on('toolbar(task-table)', function(obj){
+            if(obj.event === 'add'){
+                window.add();
+            } else if(obj.event === 'refresh'){
+                window.refresh();
+            } else if(obj.event === 'batchRemove'){
+                window.batchRemove(obj);
+            } else if (obj.event === 'manualBrush'){
+                window.manualBrush(obj);
+            } else if (obj.event === 'initTask'){
+                window.initTask(obj);
+            }
+        });
+
+        form.on('submit(task-query)', function(data){
+            table.reload('task-table',{where:data.field})
+            return false;
+        });
+
+        form.on('switch(task-enable)', function(obj){
+            layer.tips(this.value + ' ' + this.name + '：'+ obj.elem.checked, obj.othis);
+        });
+
+        window.add = function(){
+            layer.open({
+                type: 2,
+                title: '新增',
+                shade: 0.1,
+                area: ['500px', '400px'],
+                content: MODULE_PATH + 'add.html'
+            });
+        }
+
+        window.edit = function(obj){
+            layer.msg('开发中...');
+            return;
+            layer.open({
+                type: 2,
+                title: '修改',
+                shade: 0.1,
+                area: ['500px', '400px'],
+                content: MODULE_PATH + 'edit.html'
+            });
+        }
+
+        window.remove = function(obj){
+            layer.confirm('确定要删除该任务', {icon: 3, title:'提示'}, function(index){
+                layer.close(index);
+                let loading = layer.load();
+                $.ajax({
+                    url: "/task/delete/"+obj.data['id'],
+                    dataType:'json',
+                    type:'delete',
+                    success:function(result){
+                        layer.close(loading);
+                        if(result.success){
+                            layer.msg(result.msg,{icon:1,time:1000},function(){
+                                obj.del();
+                            });
+                        }else{
+                            layer.msg(result.msg,{icon:2,time:1000});
+                        }
+                    }
+                })
+            });
+        }
+
+        window.batchRemove = function(obj){
+            layer.msg('暂未开放');
+            return;
+            let data = table.checkStatus(obj.config.id).data;
+            if(data.length === 0){
+                layer.msg("未选中数据",{icon:3,time:1000});
+                return false;
+            }
+            let ids = "";
+            for(let i = 0;i<data.length;i++){
+                ids += data[i].userId+",";
+            }
+            ids = ids.substr(0,ids.length-1);
+            layer.confirm('确定要删除这些用户', {icon: 3, title:'提示'}, function(index){
+                layer.close(index);
+                let loading = layer.load();
+                $.ajax({
+                    url: MODULE_PATH+"batchRemove/"+ids,
+                    dataType:'json',
+                    type:'delete',
+                    success:function(result){
+                        layer.close(loading);
+                        if(result.success){
+                            layer.msg(result.msg,{icon:1,time:1000},function(){
+                                table.reload('task-table');
+                            });
+                        }else{
+                            layer.msg(result.msg,{icon:2,time:1000});
+                        }
+                    }
+                })
+            });
+        }
+
+        window.manualBrush = function(obj) {
+            let loading = layer.load();
+            $.ajax({
+                url: "/task/manualBrush",
+                dataType:'json',
+                type:'post',
+                success:function(result){
+                    layer.close(loading);
+                    if(result.success){
+                        result.msg = "任务开启成功";
+                        layer.msg(result.msg,{icon:1,time:1000},function(){
+                            table.reload('account-table');
+                        });
+                    }else{
+                        layer.msg(result.msg,{icon:2,time:1000});
+                    }
+                }
+            })
+        }
+
+        window.initTask = function(obj) {
+            let loading = layer.load();
+            $.ajax({
+                url: "/task/init",
+                dataType:'json',
+                type:'post',
+                success:function(result){
+                    layer.close(loading);
+                    if(result.success){
+                        layer.msg(result.msg,{icon:1,time:1000},function(){
+                            table.reload('account-table');
+                        });
+                    }else{
+                        layer.msg(result.msg,{icon:2,time:1000});
+                    }
+                }
+            })
+        }
+
+        window.refresh = function(param){
+            table.reload('task-table');
+        }
+    })
+</script>
+</body>
+</html>

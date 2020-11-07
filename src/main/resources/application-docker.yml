@@ -1,0 +1,20 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://mysql:3306/zkyzl?useSSL=false&useUnicode=true&characterEncoding=utf8&useTimezone=true&serverTimezone=Asia/Shanghai
+    username: root
+    password:
+    schema: classpath:sql/init.sql
+    initialization-mode: always
+  redis:
+    database: 0
+    host: redis
+    password:
+    port: 6379
+    timeout: 10000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-idle: 8
+        max-wait: -1ms
+        min-idle: 0

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.github.pengpan.mapper.TaskMapper">
+
+    <resultMap id="BaseResultMap" type="com.github.pengpan.entity.Task">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="account_id" jdbcType="BIGINT" property="accountId"/>
+        <result column="user_id" jdbcType="BIGINT" property="userId"/>
+        <result column="user_name" jdbcType="VARCHAR" property="userName"/>
+        <result column="dept_id" jdbcType="VARCHAR" property="deptId"/>
+        <result column="dept_name" jdbcType="VARCHAR" property="deptName"/>
+        <result column="doc_id" jdbcType="VARCHAR" property="docId"/>
+        <result column="doc_name" jdbcType="VARCHAR" property="docName"/>
+        <result column="remark" jdbcType="VARCHAR" property="remark"/>
+        <result column="schedule_item_code" jdbcType="VARCHAR" property="scheduleItemCode"/>
+        <result column="status" jdbcType="TINYINT" property="status"/>
+        <result column="target_date" jdbcType="DATE" property="targetDate"/>
+        <result column="created_at" jdbcType="TIMESTAMP" property="createdAt"/>
+        <result column="updated_at" jdbcType="TIMESTAMP" property="updatedAt"/>
+        <result column="doc_level" jdbcType="VARCHAR" property="docLevel"/>
+        <result column="reg_fee" jdbcType="VARCHAR" property="regFee"/>
+        <result column="admit_range" jdbcType="VARCHAR" property="admitRange"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, account_id, user_id, user_name, dept_id, dept_name, doc_id, doc_name, remark,
+        schedule_item_code, `status`, target_date, created_at, updated_at, doc_level, reg_fee, admit_range
+    </sql>
+
+    <select id="selectPage" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from t_task
+        <where>
+            <if test="userId > 0">
+                and user_id = #{userId}
+            </if>
+            <if test="userName != null and userName != ''">
+                and user_name like concat(#{userName}, '%')
+            </if>
+        </where>
+        order by id desc
+    </select>
+
+    <select id="selectByTargetDate" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from t_task
+        where status != 1
+        and target_date = #{targetDate}
+    </select>
+
+    <select id="findAllTask" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from t_task
+        where status != 1
+    </select>
+
+</mapper>
